@@ -11,17 +11,13 @@ import (
 )
 
 func main() {
-	// Load configuration (e.g., from environment variables or a config file).
-	// cfg, err := config.Load(".env")
-	// if err != nil {
-	// 	log.Fatalf("Could not load configuration: %v", err)
-	// }
-
 	// Set up the router.
 	r := mux.NewRouter()
 
 	// Set up routes.
 	r.HandleFunc("/", handler.HomeHandler)
+	r.HandleFunc("/signup", handler.SignUpHandler)
+	r.HandleFunc("/login", handler.LogInHandler)
 	
 	// Initialize the server with some basic configurations.
 	srv := &http.Server{
