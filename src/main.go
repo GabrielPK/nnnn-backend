@@ -8,15 +8,24 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"nnnn/main/handler"
+	// "database/sql"
+	// "gorm.io/gorm"
+	// "gorm.io/driver/sqlite"
+	// "nnnn/main/models"
+	_ "github.com/mattn/go-sqlite3"
+	"nnnn/main/database"
 )
 
 func main() {
+
+	db := database.InitializeDB()
+
 	// Set up the router.
 	r := mux.NewRouter()
 
 	// Set up routes.
 	r.HandleFunc("/", handler.HomeHandler)
-	r.HandleFunc("/signup", handler.SignUpHandler)
+	r.HandleFunc("/signup", handler.SignUpHandler(db))
 	r.HandleFunc("/login", handler.LogInHandler)
 	
 	// Initialize the server with some basic configurations.
