@@ -26,7 +26,7 @@ func main() {
 	// Set up routes.
 	r.HandleFunc("/", handler.HomeHandler)
 	r.HandleFunc("/signup", handler.SignUpHandler(db))
-	r.HandleFunc("/login", handler.LogInHandler)
+	r.HandleFunc("/login", handler.LogInHandler(db))
 	
 	// Initialize the server with some basic configurations.
 	srv := &http.Server{
