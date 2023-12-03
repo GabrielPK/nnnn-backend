@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"fmt"
-	// "context"
-	// "time"
 	"gorm.io/gorm"
 	"nnnn/main/models"
 	"golang.org/x/crypto/scrypt"
@@ -42,7 +40,7 @@ func SignUpHandler(db *gorm.DB) http.HandlerFunc {
 		}
 				
 		var hashedPassword string
-		hashedPassword, err = HashPassword(signUpRequest.Password)
+		hashedPassword, err = hashPassword(signUpRequest.Password)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -105,7 +103,7 @@ func LogInHandler(db *gorm.DB) http.HandlerFunc {
         }
 
         // Verify the password
-        if err := ComparePasswords(user.Password, logInRequest.Password); err != nil {
+        if err := comparePasswords(user.Password, logInRequest.Password); err != nil {
             // Incorrect password or hashing error
             http.Error(w, "Invalid login credentials", http.StatusUnauthorized)
             return
@@ -120,7 +118,7 @@ func LogInHandler(db *gorm.DB) http.HandlerFunc {
     }
 }
 
-func HashPassword(password string) (string, error) {
+func hashPassword(password string) (string, error) {
     // Generate a random salt
     salt := make([]byte, 16)
 	_, err := rand.Read(salt)
@@ -138,7 +136,7 @@ func HashPassword(password string) (string, error) {
     return base64.StdEncoding.EncodeToString(salt) + base64.StdEncoding.EncodeToString(dk), nil
 }
 
-func ComparePasswords(hashedPwd, plainPwd string) error {
+func comparePasswords(hashedPwd, plainPwd string) error {
     // Decode the salt (first 24 characters after base64 encoding of 16 bytes)
     salt, err := base64.StdEncoding.DecodeString(hashedPwd[:24])
     if err != nil {
