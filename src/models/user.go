@@ -2,12 +2,12 @@
 package models
 
 import (
-    "gorm.io/gorm"
+	"gorm.io/gorm"
 )
 
 type User struct {
-    gorm.Model
-    Username string
-    Password string
+	gorm.Model
+	Username string
+	Password string
 	Email    string
 }

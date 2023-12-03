@@ -3,17 +3,21 @@ package main
 import (
 	"log"
 	"net/http"
+
 	// "os"
-	"time"
 	"fmt"
-	"github.com/gorilla/mux"
 	"nnnn/main/handler"
+	"time"
+
+	"github.com/gorilla/mux"
+
 	// "database/sql"
 	// "gorm.io/gorm"
 	// "gorm.io/driver/sqlite"
 	// "nnnn/main/models"
-	_ "github.com/mattn/go-sqlite3"
 	"nnnn/main/database"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -27,7 +31,7 @@ func main() {
 	r.HandleFunc("/", handler.HomeHandler)
 	r.HandleFunc("/signup", handler.SignUpHandler(db))
 	r.HandleFunc("/login", handler.LogInHandler(db))
-	
+
 	// Initialize the server with some basic configurations.
 	srv := &http.Server{
 		Handler:      r,                // Use the mux router as the handler
