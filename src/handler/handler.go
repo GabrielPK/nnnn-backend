@@ -56,7 +56,7 @@ func SignUpHandler(db *gorm.DB) http.HandlerFunc {
 		// For example, just send them back as a response
 		responseData := map[string]string{
 			"username": signUpRequest.Username,
-			"password": hashedPassword,
+			"password": "uhoh",
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -110,5 +110,92 @@ func LogInHandler(db *gorm.DB) http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(responseData)
+	}
+}
+
+type SendNotificationRequest struct {
+	SenderId   uint   `json:"sender_id"`
+	ReceiverId uint   `json:"receiver_id"`
+	Content    string `json:"content"`
+}
+
+func SendNotificationHandler(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Only POST method is allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		var sendNotificationRequest SendNotificationRequest
+
+		// Decode the JSON body into the struct
+		err := json.NewDecoder(r.Body).Decode(&sendNotificationRequest)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// check if sender_id exists
+		var sender models.User
+		db.Where("id = ?", sendNotificationRequest.SenderId).First(&sender)
+
+		if sender.Username == "" { // sender_id does not exist
+			http.Error(w, "Sender does not exist", http.StatusBadRequest)
+			return
+		}
+
+		// check if receiver_id exists
+		var receiver models.User
+		db.Where("id = ?", sendNotificationRequest.ReceiverId).First(&receiver)
+
+		if receiver.Username == "" { // receiver_id does not exist
+			http.Error(w, "Receiver does not exist", http.StatusBadRequest)
+			return
+		}
+
+		db.Create(&models.Notification{SenderId: sendNotificationRequest.SenderId, ReceiverId: sendNotificationRequest.ReceiverId, Content: sendNotificationRequest.Content})
+
+		// For example, just send them back as a response
+		responseData := map[string]string{
+			"sender_id":   fmt.Sprint(sendNotificationRequest.SenderId),
+			"receiver_id": fmt.Sprint(sendNotificationRequest.ReceiverId),
+			"content":     sendNotificationRequest.Content,
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(responseData)
+	}
+}
+
+func ListUsersHandler(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var users []models.User
+		db.Find(&users)
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(users)
+	}
+}
+
+type GetNotificationsForUserRequest struct {
+	UserId uint `json:"user_id"`
+}
+
+func GetNotificationsForUserHandler(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var getNotificationsForUserRequest GetNotificationsForUserRequest
+
+		// Decode the JSON body into the struct
+		err := json.NewDecoder(r.Body).Decode(&getNotificationsForUserRequest)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		var notifications []models.Notification
+		db.Where("receiver_id = ?", getNotificationsForUserRequest.UserId).Find(&notifications)
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(notifications)
 	}
 }
