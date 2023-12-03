@@ -36,7 +36,7 @@ func SignUpHandler(db *gorm.DB) http.HandlerFunc {
 		}
 
 		var hashedPassword string
-		hashedPassword, err = HashPassword(signUpRequest.Password)
+		hashedPassword, err = SaltAndHashPassword(signUpRequest.Password)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

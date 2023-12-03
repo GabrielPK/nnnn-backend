@@ -10,15 +10,24 @@ import (
 	"golang.org/x/crypto/scrypt"
 )
 
-func HashPassword(password string) (string, error) {
+func SaltAndHashPassword(password string) (string, error) {
 	// Generate a random salt
 	salt := make([]byte, 16)
 	_, err := rand.Read(salt)
 	if err != nil {
-		return "", err
+		log.Fatal(err)
 	}
 
-	// Generate the hashed password
+	hashedPassword, err := HashPassword(salt, password)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Return the salt and the hashed password, encoded in base64 and concatenated
+	return hashedPassword, nil
+}
+
+func HashPassword(salt []byte, password string) (string, error) {
 	dk, err := scrypt.Key([]byte(password), salt, 1<<15, 8, 1, 32)
 	if err != nil {
 		log.Fatal(err)
@@ -42,13 +51,18 @@ func ComparePasswords(hashedPwd, plainPwd string) error {
 	}
 
 	// Hash the provided password using the same salt
-	hash, err := scrypt.Key([]byte(plainPwd), salt, 1<<15, 8, 1, 32)
+	hash, err := HashPassword(salt, plainPwd)
+	if err != nil {
+		return err
+	}
+
+	byteHash, err := base64.StdEncoding.DecodeString(hash[24:])
 	if err != nil {
 		return err
 	}
 
 	// Compare the hashes
-	if !bytes.Equal(hash, storedHash) {
+	if !bytes.Equal(byteHash, storedHash) {
 		return fmt.Errorf("password does not match")
 	}
 	return nil
