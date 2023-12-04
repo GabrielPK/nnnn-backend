@@ -12,7 +12,7 @@ all: test build
 # Compile the binary
 build:
 	@echo "Building $(BINARY_NAME)..."
-	@cd $(SRC_DIR) && go build -o ../$(BINARY_NAME)
+	@cd $(SRC_DIR) && CGO_ENABLED=1 go build -o ../$(BINARY_NAME)
 
 # Run the application
 run: build
